@@ -72,6 +72,15 @@ async def add_reaction(message, role_dict):
         await message.add_reaction(team_emoji)
 
 
+async def find_if_assigned_role(user, message):
+    reactions = message.reactions
+    for emojis in reactions:
+        user_list = await emojis.users().flatten()
+        for user_reacted in user_list:
+            if user.id == user_reacted.id:
+                return True
+    return False
+
 """
 Set the user's role based on what team they react to the message with
 """
@@ -83,9 +92,24 @@ async def request_add_role(client, payload):
     guild = await client.fetch_guild(payload.guild_id)
     user = payload.member
 
+    # Check to see if the user already has a team role or not
+    al_message = await channel.fetch_message(int(message_data['al_message_id']))
+    nl_message = await channel.fetch_message(int(message_data['nl_message_id']))
+    if await find_if_assigned_role(user, al_message):
+        await al_message.remove_reaction(payload.emoji, user)
+        print("User already has role assigned! Did not add second role.")
+        return
+
+    if await find_if_assigned_role(user, nl_message):
+        await nl_message.remove_reaction(payload.emoji, user)
+        print("User already has role assigned! Did not add second role.")
+        return
+
+    # Verify the bot isn't requesting to add a role for itself
     if payload.user_id == int(bot_id):
         return
 
+    # Verify the message is in the welcome channel, as it should be
     if message.channel.id != int(welcome_channel_id):
         print("WARNING: The message's channel ID does not match the welcome channel ID")
         return
