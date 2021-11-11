@@ -1,5 +1,5 @@
 {
-  "welcome_message": "Greetings! Welcome to the ~~Shohei Ohtani Fan Club~~ Discordantly Wild! A Discord for the Effectively Wild podcast for patreon supporters.\n\nReact with your favorite team's emoji below to gain access to your team's chat and start talking with other fans.\n\nPlease note you may only choose one team and if you attempt to choose more than one, I (the bot) will remove the team you just added. If you wish to switch teams, use '$remove' followed by the role name to remove your role and then select a new team.",
+  "welcome_message": "Greetings! Welcome to the ~~Shohei Ohtani Fan Club~~ Discordantly Wild! A Discord for the Effectively Wild podcast for patreon supporters.\n\nReact with your favorite team's emoji below to gain access to your team's chat and start talking with other fans.\n\nPlease note you may only choose one team and if you attempt to choose more than one, the bot will remove the team you just added. If you wish to switch teams, use '$remove' followed by the role name to remove your role and then select a new team.",
   "al_message": "---------------------------------\n**American League Teams**\n---------------------------------\n",
   "nl_message": "---------------------------------\n**National League Teams**\n---------------------------------\n",
   "al_message_id": "908257771579920446",
