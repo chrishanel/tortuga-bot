@@ -72,13 +72,14 @@ async def add_reaction(message, role_dict):
         await message.add_reaction(team_emoji)
 
 
-async def find_if_assigned_role(user, message):
+async def find_if_assigned_role(user, message, payload):
     reactions = message.reactions
     for emojis in reactions:
-        user_list = await emojis.users().flatten()
-        for user_reacted in user_list:
-            if user.id == user_reacted.id:
-                return True
+        if emojis.emoji != payload.emoji:
+            user_list = await emojis.users().flatten()
+            for user_reacted in user_list:
+                if user.id == user_reacted.id:
+                    return True
     return False
 
 """
@@ -95,12 +96,12 @@ async def request_add_role(client, payload):
     # Check to see if the user already has a team role or not
     al_message = await channel.fetch_message(int(message_data['al_message_id']))
     nl_message = await channel.fetch_message(int(message_data['nl_message_id']))
-    if await find_if_assigned_role(user, al_message):
+    if await find_if_assigned_role(user, al_message, payload):
         await al_message.remove_reaction(payload.emoji, user)
         print("User already has role assigned! Did not add second role.")
         return
 
-    if await find_if_assigned_role(user, nl_message):
+    if await find_if_assigned_role(user, nl_message, payload):
         await nl_message.remove_reaction(payload.emoji, user)
         print("User already has role assigned! Did not add second role.")
         return
