@@ -26,6 +26,11 @@ def run_tortuga_bot():
         await request_add_role(client, payload)
 
     @client.event
+    async def on_message(message):
+        if message.content.startswith("$remove") or message.content.startswith('$remove'):
+            await request_delete_role(client, message)
+
+    @client.event
     async def on_ready():
         print('------')
         print('Logged in as')

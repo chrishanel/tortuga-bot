@@ -52,9 +52,11 @@ async def create_react_message(client):
             await channel.send(welcome_message)
         if not await verify_message_posted(channel, "American League"):
             message_sent = await channel.send(al_message)
+            message_data['al_message_id'] = message_sent.id
             await add_reaction(message_sent, al_role_dict)
         if not await verify_message_posted(channel, "National League"):
             message_sent = await channel.send(nl_message)
+            message_data['nl_message_id'] = message_sent.id
             await add_reaction(message_sent, nl_role_dict)
     except discord.Forbidden:
         print("WARNING: I do not have permission to post messages, please give #welcome permissions and restart me.")
@@ -97,6 +99,51 @@ async def request_add_role(client, payload):
 
 
 """
+At the request of a user, remove them from a team role
+"""
+
+
+async def request_delete_role(client, message):
+    user = message.author
+    guild = message.guild
+    team = message.content.lower().split("$remove")[1].strip()
+    nl_message_id = int(message_data['nl_message_id'])
+    al_message_id = int(message_data['al_message_id'])
+    welcome_channel = client.get_channel(int(welcome_channel_id))
+
+    for team_role, team_emoji in al_role_dict.items():
+        if team.lower() == team_role.lower():
+            try:
+                role = discord.utils.get(guild.roles, name=team_role)
+                await user.remove_roles(role)
+                reaction_message = await welcome_channel.fetch_message(al_message_id)
+                await reaction_message.remove_reaction(team_emoji, user)
+                print("Removed " + user.name + " from " + team)
+                await message.channel.send("Successfully removed the " + team_role + " role")
+                return
+            except:
+                print("Error removing " + user.name + " from " + team_role + ". Please see stack trace below for more info")
+                traceback.print_exc()
+
+    for team_role, team_emoji in nl_role_dict.items():
+        if team.lower() == team_role.lower():
+            try:
+                role = discord.utils.get(guild.roles, name=team_role)
+                await user.remove_roles(role)
+                reaction_message = await welcome_channel.fetch_message(nl_message_id)
+                await reaction_message.remove_reaction(team_emoji, user)
+                print("Removed " + user.name + " from " + team_role)
+                await message.channel.send("Successfully removed the " + team_role + " role")
+                return
+            except:
+                print("Error removing " + user.name + " from " + team + ". Please see stack trace below for more info")
+                traceback.print_exc()
+
+    await message.channel.send("Failed to remove the " + team + " role, please verify the role name is correct and the role is assigned to you.")
+    print("Error removing the " + team + " role from " + user.name)
+
+
+"""
 Iterate through the specified league's teams and set the role for the user to the specified team
 """
 
@@ -109,6 +156,5 @@ async def set_role(payload, user, guild, role_dict):
                 await user.add_roles(role)
                 print("Added " + user.name + " to " + team_role)
             except:
-                print(
-                    "Error adding " + user.name + " to " + team_role + ". Please see stack trace below for more info")
+                print("Error adding " + user.name + " to " + team_role + ". Please see stack trace below for more info")
                 traceback.print_exc()
