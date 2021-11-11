@@ -93,6 +93,10 @@ async def request_add_role(client, payload):
     guild = await client.fetch_guild(payload.guild_id)
     user = payload.member
 
+    # Verify the bot isn't requesting to add a role for itself
+    if payload.user_id == int(bot_id):
+        return
+
     # Check to see if the user already has a team role or not
     al_message = await channel.fetch_message(int(message_data['al_message_id']))
     nl_message = await channel.fetch_message(int(message_data['nl_message_id']))
@@ -104,10 +108,6 @@ async def request_add_role(client, payload):
     if await find_if_assigned_role(user, nl_message, payload):
         await nl_message.remove_reaction(payload.emoji, user)
         print("User already has role assigned! Did not add second role.")
-        return
-
-    # Verify the bot isn't requesting to add a role for itself
-    if payload.user_id == int(bot_id):
         return
 
     # Verify the message is in the welcome channel, as it should be
