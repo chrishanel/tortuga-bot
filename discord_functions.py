@@ -75,7 +75,7 @@ Set the user's role based on what team they react to the message with
 """
 
 
-async def request_role(client, payload):
+async def request_add_role(client, payload):
     channel = client.get_channel(int(welcome_channel_id))
     message = await channel.fetch_message(payload.message_id)
     guild = await client.fetch_guild(payload.guild_id)
@@ -90,10 +90,10 @@ async def request_role(client, payload):
 
     # AL role requested, go through AL teams
     if "American League" in message.content:
-        await set_role(client, payload, user, guild, al_role_dict)
+        await set_role(payload, user, guild, al_role_dict)
     # NL role requested, go through NL teams
     elif "National League" in message.content:
-        await set_role(client, payload, user, guild, nl_role_dict)
+        await set_role(payload, user, guild, nl_role_dict)
 
 
 """
@@ -101,7 +101,7 @@ Iterate through the specified league's teams and set the role for the user to th
 """
 
 
-async def set_role(client, payload, user, guild, role_dict):
+async def set_role(payload, user, guild, role_dict):
     for team_role, team_emoji in role_dict.items():
         if str(payload.emoji) == team_emoji:
             try:

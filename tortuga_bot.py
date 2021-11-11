@@ -23,8 +23,7 @@ def run_tortuga_bot():
 
     @client.event
     async def on_raw_reaction_add(payload):
-        await request_role(client, payload)
-
+        await request_add_role(client, payload)
 
     @client.event
     async def on_ready():
