@@ -198,7 +198,7 @@ async def send_saber_response(client, message):
     stat_reformatted = ""
     for data in saber_data:
         if "typings" in data.lower() and stat_requested.lower() in saber_data[data].lower():
-            stat_reformatted = saber_data[data].split(" ")[0].strip()
+            stat_reformatted = saber_data[data].split(",")[0].strip()
 
     embed_message = discord.Embed(title="Statblast", color=0x50AE26)
 

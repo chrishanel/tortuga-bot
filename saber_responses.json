@@ -1,7 +1,7 @@
 {
     "Comment": "For formatting this file, please use the stat name followed by 'Typings' and then include every iteration you want the bot to look for as the content WITH THE FIRST FORMAT THE KEY FOR THE DEFINITION, for example for OPS+ you'd do 'OPS+ Typings' and have 'OPS+ opsplus etc..' and then 'OPS+' is the key that contains the definition on the line below",
-    "OPS+ Typings": "OPS+ opsplus",
+    "OPS+ Typings": "OPS+, opsplus",
     "OPS+": "OPS+ takes a player's on-base plus slugging percentage and normalizes the number across the entire league. It accounts for external factors like ballparks. It then adjusts so a score of 100 is league average, and 150 is 50 percent better than the league average.",
-    "ERA+ Typings": "ERA+ eraplus",
+    "ERA+ Typings": "ERA+, eraplus",
     "ERA+": "yadayadayada"
 }
