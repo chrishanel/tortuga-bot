@@ -19,6 +19,9 @@ with open('config.json', 'r') as config_file:
 with open('messages.json', 'r') as message_file:
     message_data = json.load(message_file)
 
+with open('saber_responses.json', 'r') as message_file:
+    saber_data = json.load(message_file)
+
 welcome_channel_id = config_data['welcome_channel_id']
 bot_id = config_data['bot_id']
 welcome_message = message_data['welcome_message']
@@ -131,7 +134,7 @@ At the request of a user, remove them from a team role
 async def request_delete_role(client, message):
     user = message.author
     guild = message.guild
-    team = message.content.lower().split("$remove")[1].strip()
+    team = message.content.lower().split("!remove")[1].strip()
     nl_message_id = int(message_data['nl_message_id'])
     al_message_id = int(message_data['al_message_id'])
     welcome_channel = client.get_channel(int(welcome_channel_id))
@@ -183,3 +186,30 @@ async def set_role(payload, user, guild, role_dict):
             except:
                 print("Error adding " + user.name + " to " + team_role + ". Please see stack trace below for more info")
                 traceback.print_exc()
+
+
+"""
+Find the stat requested and share the definition
+"""
+
+
+async def send_saber_response(client, message):
+    stat_requested = message.content.lower().split("!stat")[1].strip()
+    stat_reformatted = ""
+    for data in saber_data:
+        if "typings" in data.lower() and stat_requested.lower() in saber_data[data].lower():
+            stat_reformatted = saber_data[data].split(" ")[0].strip()
+
+    embed_message = discord.Embed(title="Statblast", color=0x50AE26)
+
+    # Did not find stat in list and thus could not reformat, let user know the stat was not found
+    if stat_reformatted == "":
+        print("Error: could not find stat " + stat_requested + ".")
+        embed_message.add_field(name="ERROR", value="Could not find stat " + stat_requested + ".", inline=False)
+
+    else:
+        stat_definition = saber_data[stat_reformatted]
+        embed_message.add_field(name="Definition of " + stat_reformatted, value=stat_definition, inline=False)
+        print("Posted the following stat: " + stat_requested + ".")
+
+    await message.channel.send(embed=embed_message)
