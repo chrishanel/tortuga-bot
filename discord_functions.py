@@ -1,6 +1,7 @@
 import traceback
 import discord
 import json
+from wiki_functions import *
 
 al_role_dict = {"Orioles": "<:BAL:907714486507565096>", "Red Sox": "<:BOS:907714486604013678>", "Guardians": "<:CLE:907714486583033957>",
                 "White Sox": "<:CWS:907714486591434822>", "Tigers": "<:DET:907714487476445235>", "Astros": "<:HOU:907714485467357186>",
@@ -141,7 +142,7 @@ At the request of a user, remove them from a team role
 async def request_delete_role(client, message):
     user = message.author
     guild = message.guild
-    team = message.content.lower().split("$remove")[1].strip()
+    team = message.content.lower().split("!remove")[1].strip()
     nl_message_id = int(message_data['nl_message_id'])
     al_message_id = int(message_data['al_message_id'])
     welcome_channel = client.get_channel(int(welcome_channel_id))
@@ -198,3 +199,37 @@ async def set_role(payload, user, guild, role_dict):
             except:
                 print("Error adding " + user.name + " to " + team_role + ". Please see stack trace below for more info")
                 traceback.print_exc()
+
+
+"""
+Search through the wiki and find the requested episode and respond with a link to it
+"""
+async def request_episode(message):
+    if message.content.lower().startswith("!ep"):
+        search_episode = message.content.lower().split("!ep")[1].strip()
+    elif message.content.startswith('!episode'):
+        search_episode = message.content.lower().split("!episode")[1].strip()
+
+    episode_message = discord.Embed(color=0x50AE26)
+
+    # If user wants to be given a random episode
+    if not str.isdigit(search_episode) and (search_episode.lower() == "random" or search_episode.lower() == "r"):
+        episode_page = search_for_random_episode()
+        if episode_page is None:
+            episode_message.add_field(name="ERROR", value="Could not find an episode.", inline=False)
+        else:
+            episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+
+    # If user wants a specific episode
+    elif str.isdigit(search_episode):
+        episode_page = search_for_episode_by_number(search_episode)
+        if episode_page is None:
+            episode_message.add_field(name="ERROR", value="Could not find episode " + search_episode, inline=False)
+        else:
+            episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+
+    # If could not query
+    else:
+        episode_message.add_field(name="ERROR", value="Could not search for episode, please send a request with an episode number", inline=False)
+
+    await message.channel.send(embed=episode_message)
