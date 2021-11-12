@@ -217,16 +217,20 @@ async def request_episode(message):
         episode_page = search_for_random_episode()
         if episode_page is None:
             episode_message.add_field(name="ERROR", value="Could not find an episode.", inline=False)
+            print("Error: Could not find a random episode")
         else:
             episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+            print("Found " + episode_page.title + "!")
 
     # If user wants a specific episode
     elif str.isdigit(search_episode):
         episode_page = search_for_episode_by_number(search_episode)
         if episode_page is None:
             episode_message.add_field(name="ERROR", value="Could not find episode " + search_episode, inline=False)
+            print("Error: Could not find Episode " + search_episode + ".")
         else:
             episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+            print("Found Episode " + search_episode + "!")
 
     # If could not query
     else:
