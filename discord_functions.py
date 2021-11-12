@@ -19,7 +19,12 @@ with open('config.json', 'r') as config_file:
 with open('messages.json', 'r') as message_file:
     message_data = json.load(message_file)
 
-welcome_channel_id = config_data['welcome_channel_id']
+# Handle if testing or not
+if config_data['test_mode'] == "ON":
+    welcome_channel_id = config_data['test_channel_id']
+else:
+    welcome_channel_id = config_data['welcome_channel_id']
+
 bot_id = config_data['bot_id']
 welcome_message = message_data['welcome_message']
 al_message = message_data['al_message']
@@ -52,11 +57,11 @@ async def create_react_message(client):
             await channel.send(welcome_message)
         if not await verify_message_posted(channel, "American League"):
             message_sent = await channel.send(al_message)
-            message_data['al_message_id'] = message_sent.id
+            message_data['al_message_id'] = message_sent.id     # Update the json file with the message's ID
             await add_reaction(message_sent, al_role_dict)
         if not await verify_message_posted(channel, "National League"):
             message_sent = await channel.send(nl_message)
-            message_data['nl_message_id'] = message_sent.id
+            message_data['nl_message_id'] = message_sent.id     # Update the json file with the message's ID
             await add_reaction(message_sent, nl_role_dict)
     except discord.Forbidden:
         print("WARNING: I do not have permission to post messages, please give #welcome permissions and restart me.")
@@ -72,15 +77,17 @@ async def add_reaction(message, role_dict):
         await message.add_reaction(team_emoji)
 
 
-async def find_if_assigned_role(user, message, payload):
-    reactions = message.reactions
-    for emojis in reactions:
-        if emojis.emoji != payload.emoji:
-            user_list = await emojis.users().flatten()
-            for user_reacted in user_list:
-                if user.id == user_reacted.id:
-                    return True
+async def find_if_assigned_max_roles(user):
+    user_roles = user.roles
+    role_count = 0
+    for role in user_roles:
+        # If the user has hit the max number of teams, return true
+        if role_count >= 3:
+            return True
+        if role.name in al_role_dict.keys() or role.name in nl_role_dict.keys():
+            role_count = role_count + 1
     return False
+
 
 """
 Set the user's role based on what team they react to the message with
@@ -97,18 +104,21 @@ async def request_add_role(client, payload):
     if payload.user_id == int(bot_id):
         return
 
-    # Check to see if the user already has a team role or not
-    al_message = await channel.fetch_message(int(message_data['al_message_id']))
-    nl_message = await channel.fetch_message(int(message_data['nl_message_id']))
-    if await find_if_assigned_role(user, al_message, payload):
-        await al_message.remove_reaction(payload.emoji, user)
-        print("User already has role assigned! Did not add second role.")
-        return
-
-    if await find_if_assigned_role(user, nl_message, payload):
-        await nl_message.remove_reaction(payload.emoji, user)
-        print("User already has role assigned! Did not add second role.")
-        return
+    al_message_react = await channel.fetch_message(int(message_data['al_message_id']))
+    nl_message_react = await channel.fetch_message(int(message_data['nl_message_id']))
+    # Check if the new team the user attempted to add was AL and remove reaction if hit max
+    if await find_if_assigned_max_roles(user):
+        if str(payload.emoji) in al_role_dict.values():
+            await al_message_react.remove_reaction(payload.emoji, user)
+            print("User already has max number of roles! Did not add second role.")
+            return
+        elif str(payload.emoji) in nl_role_dict.values():
+            await nl_message_react.remove_reaction(payload.emoji, user)
+            print("User already has max number of roles! Did not add second role.")
+            return
+        else:
+            print("User already has max number of roles! Could not remove reaction")
+            return
 
     # Verify the message is in the welcome channel, as it should be
     if message.channel.id != int(welcome_channel_id):
@@ -136,6 +146,8 @@ async def request_delete_role(client, message):
     al_message_id = int(message_data['al_message_id'])
     welcome_channel = client.get_channel(int(welcome_channel_id))
 
+    remove_message = discord.Embed(color=0x50AE26)
+
     for team_role, team_emoji in al_role_dict.items():
         if team.lower() == team_role.lower():
             try:
@@ -143,8 +155,9 @@ async def request_delete_role(client, message):
                 await user.remove_roles(role)
                 reaction_message = await welcome_channel.fetch_message(al_message_id)
                 await reaction_message.remove_reaction(team_emoji, user)
-                print("Removed " + user.name + " from " + team)
-                await message.channel.send("Successfully removed the " + team_role + " role")
+                print("Removed " + user.name + " from " + team_role)
+                remove_message.add_field(name="SUCCESS", value="Successfully removed the " + team_role + " role", inline=False)
+                await message.channel.send(embed=remove_message)
                 return
             except:
                 print("Error removing " + user.name + " from " + team_role + ". Please see stack trace below for more info")
@@ -158,13 +171,15 @@ async def request_delete_role(client, message):
                 reaction_message = await welcome_channel.fetch_message(nl_message_id)
                 await reaction_message.remove_reaction(team_emoji, user)
                 print("Removed " + user.name + " from " + team_role)
-                await message.channel.send("Successfully removed the " + team_role + " role")
+                remove_message.add_field(name="SUCCESS", value="Successfully removed the " + team_role + " role", inline=False)
+                await message.channel.send(embed=remove_message)
                 return
             except:
                 print("Error removing " + user.name + " from " + team + ". Please see stack trace below for more info")
                 traceback.print_exc()
 
-    await message.channel.send("Failed to remove the " + team + " role, please verify the role name is correct and the role is assigned to you.")
+    remove_message.add_field(name="ERROR", value="Failed to remove the " + team + " role, please verify the role name is correct and the role is assigned to you.", inline=False)
+    await message.channel.send(embed=remove_message)
     print("Error removing the " + team + " role from " + user.name)
 
 
