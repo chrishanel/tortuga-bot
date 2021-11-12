@@ -27,8 +27,11 @@ def run_tortuga_bot():
 
     @client.event
     async def on_message(message):
-        if message.content.startswith("$remove") or message.content.startswith('$remove'):
+        if message.content.lower().startswith("!remove"):
             await request_delete_role(client, message)
+
+        if message.content.lower().startswith("!ep") or message.content.lower().startswith('!episode'):
+            await request_episode(message)
 
     @client.event
     async def on_ready():
