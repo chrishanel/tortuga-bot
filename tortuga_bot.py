@@ -8,6 +8,7 @@ import discord
 import json
 
 from discord_functions import *
+from sabermetric_glossary import try_send_metric
 
 """
 Call the commands and run the bot
@@ -32,6 +33,9 @@ def run_tortuga_bot():
 
         if message.content.lower().startswith("!ep") or message.content.lower().startswith('!episode'):
             await request_episode(message)
+            
+        if message.content.lower().startswith("!stat"):
+            await try_send_metric(client, message)
 
     @client.event
     async def on_ready():
@@ -40,7 +44,6 @@ def run_tortuga_bot():
         print(client.user.name)
         print(client.user.id)
         print('------')
-
         await create_react_message(client)
 
     client.run(token)
