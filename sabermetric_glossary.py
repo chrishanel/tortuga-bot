@@ -41,6 +41,11 @@ async def try_send_metric(client, message):
     target_metric = message.content.lower().split("!stat")[1].strip()
     if target_metric not in glossary:
         print(f"Error: couldn't find stat called {target_metric}")
+        error_message = discord.Embed(color=0x50AE26)
+        error_message.add_field(name="ERROR",
+                                 value="Couldn't find a stat called " + target_metric,
+                                 inline=False)
+        await message.channel.send(embed=error_message)
         return
 
     await send_metric_by_name(client, target_metric)
