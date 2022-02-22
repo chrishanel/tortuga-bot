@@ -12,13 +12,13 @@ Send the metric back to Discord
 """
 
 
-async def send_metric(client, metric):
+async def send_metric(message, metric):
     embed = discord.Embed(title=f"Sabermetric Glossary: {metric['name']}")
     embed.add_field(name="Definition", value=metric['definition'], inline=False)
     record = metric['record']
     embed.add_field(name=f"Record {metric['name']}", value=f"{record['value']} - {record['holder']}, {record['year']}",
                     inline=True)
-    await client.send(embed=embed)
+    await message.channel.send(embed=embed)
 
 
 """
@@ -27,8 +27,8 @@ Send the metric via name
 """
 
 
-async def send_metric_by_name(client, metric_name):
-    await send_metric(client, glossary[metric_name])
+async def send_metric_by_name(message, metric_name):
+    await send_metric(message, glossary[metric_name])
 
 
 """
@@ -43,9 +43,9 @@ async def try_send_metric(client, message):
         print(f"Error: couldn't find stat called {target_metric}")
         error_message = discord.Embed(color=0x50AE26)
         error_message.add_field(name="ERROR",
-                                 value="Couldn't find a stat called " + target_metric,
-                                 inline=False)
+                                value="Couldn't find a stat called " + target_metric,
+                                inline=False)
         await message.channel.send(embed=error_message)
         return
 
-    await send_metric_by_name(client, target_metric)
+    await send_metric_by_name(message, target_metric)

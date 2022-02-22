@@ -5,7 +5,7 @@
   "al_message_id": "908257771579920446",
   "nl_message_id": "908257795370016839",
   "sabermetric_glossary": {
-    "OPS+": {
+    "ops+": {
       "name": "OPS+",
       "definition": "OPS+ takes a player's OPS (on base plus slugging) and normalizes the number across hte entire league for the time period being measured. It accounts for external factors like ballparks. It then adjusts so a score of 100 is league average, and 150 is 50 percent better than the league average.",
       "record": {
