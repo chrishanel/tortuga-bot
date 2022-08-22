@@ -205,21 +205,25 @@ async def set_role(payload, user, guild, role_dict):
 Search through the wiki and find the requested episode and respond with a link to it
 """
 async def request_episode(message):
-    if message.content.lower().startswith("!ep"):
-        search_episode = message.content.lower().split("!ep")[1].strip()
-    elif message.content.startswith('!episode'):
-        search_episode = message.content.lower().split("!episode")[1].strip()
+    # content is known to begin with !ep or !episode
+    # strip off the prefix
+    content = message.content.lower()
+    rest = content[3:]
+    if (rest.startswith("isode")):
+        rest = rest[5:]
+
+    search_episode = rest.split()[0]
 
     episode_message = discord.Embed(color=0x50AE26)
 
     # If user wants to be given a random episode
-    if not str.isdigit(search_episode) and (search_episode.lower() == "random" or search_episode.lower() == "r"):
+    if not str.isdigit(search_episode) and (search_episode == "random" or search_episode == "r"):
         episode_page = search_for_random_episode()
         if episode_page is None:
             episode_message.add_field(name="ERROR", value="Could not find an episode.", inline=False)
             print("Error: Could not find a random episode")
         else:
-            episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+            episode_message.add_field(name=episode_page.title, value=encode_episode_url(episode_page.url), inline=False)
             print("Found " + episode_page.title + "!")
 
     # If user wants a specific episode
@@ -229,7 +233,7 @@ async def request_episode(message):
             episode_message.add_field(name="ERROR", value="Could not find episode " + search_episode, inline=False)
             print("Error: Could not find Episode " + search_episode + ".")
         else:
-            episode_message.add_field(name=episode_page.title, value=episode_page.url, inline=False)
+            episode_message.add_field(name=episode_page.title, value=encode_episode_url(episode_page.url), inline=False)
             print("Found Episode " + search_episode + "!")
 
     # If could not query
