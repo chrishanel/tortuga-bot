@@ -32,3 +32,5 @@ def search_for_random_episode():
     return episode_page
 
 
+def encode_episode_url(url):
+    return url.replace("?", "%3f")

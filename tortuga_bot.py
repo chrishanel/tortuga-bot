@@ -28,13 +28,14 @@ def run_tortuga_bot():
 
     @client.event
     async def on_message(message):
-        if message.content.lower().startswith("!remove"):
+        content = message.content.lower()
+        if content.startswith("!remove"):
             await request_delete_role(client, message)
 
-        if message.content.lower().startswith("!ep") or message.content.lower().startswith('!episode'):
+        if content.startswith("!ep"):
             await request_episode(message)
             
-        if message.content.lower().startswith("!stat"):
+        if content.startswith("!stat"):
             await try_send_metric(client, message)
 
     @client.event
